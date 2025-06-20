@@ -61,39 +61,35 @@ void main()
 
 	//5)
 	//int recvbuflen = DEFAULT_BUFFER_LENGHT;
-	CONST CHAR SEND_BUFFER[] = "Hello Server, i am Client";
+	CHAR send_buffer[DEFAULT_BUFFER_LENGHT] = "Hello Server, i am Client";
 	CHAR recvbuffer[DEFAULT_BUFFER_LENGHT]{};
-
-	iResult = send(connect_socket, SEND_BUFFER, strlen(SEND_BUFFER), 0);
-	if (iResult == SOCKET_ERROR)
-	{
-		cout << "Send data failed with " << WSAGetLastError() << endl;
-		closesocket(connect_socket);
-		freeaddrinfo(result);
-		WSACleanup();
-		return;
-	}
-	cout << iResult << " Bytes sent" << endl;
-
-	//iResult = shutdown(connect_socket, SD_SEND);
-	if (iResult == SOCKET_ERROR)
-	{
-		cout << "Shutdown failed" << WSAGetLastError() << endl;
-		closesocket(connect_socket);
-		freeaddrinfo(result);
-		WSACleanup();
-		return;
-	}
-
-	//6)
 	do
 	{
+		iResult = send(connect_socket, send_buffer, strlen(send_buffer), 0);
+		if (iResult == SOCKET_ERROR)
+		{
+			cout << "Send data failed with " << WSAGetLastError() << endl;
+			closesocket(connect_socket);
+			freeaddrinfo(result);
+			WSACleanup();
+			return;
+		}
+		cout << iResult << " Bytes sent" << endl;
+
+		//6)
+
 		iResult = recv(connect_socket, recvbuffer, DEFAULT_BUFFER_LENGHT, 0);
 		if (iResult > 0)cout << "Bytes received: " << iResult << ",Message: " << recvbuffer << endl;
 		else if (iResult == 0)cout << "Connection close" << endl;
 		else cout << "Received failed with code" << WSAGetLastError() << endl;
-
-	} while (iResult > 0 );
+		ZeroMemory(send_buffer, sizeof(send_buffer));
+		ZeroMemory(recvbuffer, sizeof(recvbuffer));
+		cout << "Add message:";
+		SetConsoleCP(1251);
+		cin.getline(send_buffer, DEFAULT_BUFFER_LENGHT);
+		SetConsoleCP(866);
+		//for (int i = 0; send_buffer[i]; i++)send_buffer[i] = tolower(send_buffer[i]);
+	} while (iResult > 0 && strcmp(send_buffer, "Exit"));
 
 	//7) 
 	iResult = shutdown(connect_socket, SD_SEND);

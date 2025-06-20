@@ -30,7 +30,7 @@ void main()
 
 	//2) получаем фдреса на которые можно запустить сокет
 	addrinfo hints;
-	ZeroMemory(&hints,sizeof(hints));
+	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_INET;	//TCP/ipv4
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;
@@ -86,13 +86,15 @@ void main()
 	SOCKET ClientSocket = accept(ListenSocket, NULL, NULL);
 	do
 	{
+		ZeroMemory(recvbuffer, sizeof(recvbuffer));
 		iResult = recv(ClientSocket, recvbuffer, recv_buffer_length, 0);
 		if (iResult > 0)
 		{
 			cout << "Bytes received: " << iResult << endl;
 			cout << "Message: " << recvbuffer << endl;
 			CHAR sz_responce[] = "Hello, i am Server! Nice to meet you!";
-			INT iSendResult = send(ClientSocket, sz_responce, sizeof(sz_responce), 0);
+			//INT iSendResult = send(ClientSocket, sz_responce, sizeof(sz_responce), 0);
+			INT iSendResult = send(ClientSocket, recvbuffer, strlen(recvbuffer), 0);
 			if (iSendResult == SOCKET_ERROR)
 			{
 				cout << "Error: Send failed with code: " << WSAGetLastError() << endl;
@@ -107,15 +109,18 @@ void main()
 		else if (iResult == 0)
 		{
 			cout << "Connection closing" << endl;
+			closesocket(ClientSocket);
 		}
 		else
 		{
 			cout << "Error: recv() failed with code" << WSAGetLastError() << endl;
 			closesocket(ClientSocket);
-			closesocket(ListenSocket);
-			freeaddrinfo(result);
-			WSACleanup();
-			return;
+			//return;
 		}
 	} while (iResult > 0);
+	closesocket(ListenSocket);
+	freeaddrinfo(result);
+	WSACleanup();
 }
+
+//VOID HandleClient(SOCKET ClientSocket, )
